@@ -26,7 +26,8 @@ if ($_POST) {
 	$id = (int)($_POST['id'] ?? 0);
 	
 	$university_id = (int)($_POST['university_id'] ?? 0);
-	$code = trim($_POST['code'] ?? '');
+    $code = trim($_POST['code'] ?? '');
+    $moet_code = trim($_POST['moet_code'] ?? '');
 	$name = trim($_POST['name'] ?? '');
 	$description = trim($_POST['description'] ?? '');
 	$training_level = $_POST['training_level'] ?? 'Đại học';
@@ -38,13 +39,13 @@ if ($_POST) {
 			$message_type = 'error';
 		} else {
 			try {
-				if ($action === 'add') {
-					$stmt = $pdo->prepare("INSERT INTO majors (university_id, code, name, description, training_level, duration_years) VALUES (?, ?, ?, ?, ?, ?)");
-					$stmt->execute([$university_id, $code, $name, $description, $training_level, $duration_years]);
+                if ($action === 'add') {
+                    $stmt = $pdo->prepare("INSERT INTO majors (university_id, code, moet_code, name, description, training_level, duration_years) VALUES (?, ?, ?, ?, ?, ?, ?)");
+                    $stmt->execute([$university_id, $code, ($moet_code !== '' ? $moet_code : null), $name, $description, $training_level, $duration_years]);
 					$message = 'Thêm ngành thành công';
 				} else {
-					$stmt = $pdo->prepare("UPDATE majors SET university_id=?, code=?, name=?, description=?, training_level=?, duration_years=? WHERE id=?");
-					$stmt->execute([$university_id, $code, $name, $description, $training_level, $duration_years, $id]);
+                    $stmt = $pdo->prepare("UPDATE majors SET university_id=?, code=?, moet_code=?, name=?, description=?, training_level=?, duration_years=? WHERE id=?");
+                    $stmt->execute([$university_id, $code, ($moet_code !== '' ? $moet_code : null), $name, $description, $training_level, $duration_years, $id]);
 					$message = 'Cập nhật ngành thành công';
 				}
 				$message_type = 'success';
@@ -82,12 +83,12 @@ $whereSql = empty($where) ? '' : ('WHERE ' . implode(' AND ', $where));
 
 // Lấy danh sách ngành
 $sql = "
-	SELECT m.*, u.name as university_name, u.code as university_code,
-		(SELECT COUNT(*) FROM admission_scores a WHERE a.major_id = m.id) as score_count
-	FROM majors m
-	JOIN universities u ON m.university_id = u.id
-	$whereSql
-	ORDER BY u.name, m.name
+    SELECT m.*, u.name as university_name, u.code as university_code,
+        (SELECT AVG(a.min_score) FROM admission_scores a WHERE a.major_id = m.id) as avg_score
+    FROM majors m
+    LEFT JOIN universities u ON m.university_id = u.id
+    $whereSql
+    ORDER BY COALESCE(u.name, ''), m.name
 ";
 $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
@@ -209,6 +210,10 @@ $show_form = isset($_GET['new']) || !empty($edit_major);
 						<input type="text" name="name" value="<?php echo escape($edit_major['name'] ?? ''); ?>" required>
 					</div>
 					<div class="form-group">
+						<label>Mã MOET (nếu có)</label>
+						<input type="text" name="moet_code" value="<?php echo escape($edit_major['moet_code'] ?? ''); ?>" placeholder="VD: 7140201">
+					</div>
+					<div class="form-group">
 						<label>Trình độ</label>
 						<select name="training_level">
 							<?php $levels=['Đại học','Cao đẳng','Thạc sĩ','Tiến sĩ']; foreach($levels as $lv): ?>
@@ -241,11 +246,12 @@ $show_form = isset($_GET['new']) || !empty($edit_major);
 						<tr>
 							<th>STT</th>
 							<th>Trường</th>
-							<th>Mã ngành</th>
+                            <th>Mã ngành</th>
+                            <th>Mã MOET</th>
 							<th>Tên ngành</th>
 							<th>Trình độ</th>
 							<th>Thời gian</th>
-							<th>Điểm chuẩn</th>
+                            <th>Điểm TB</th>
 							<th>Thao tác</th>
 						</tr>
 					</thead>
@@ -254,11 +260,12 @@ $show_form = isset($_GET['new']) || !empty($edit_major);
 						<tr>
 							<td><?php echo $i+1; ?></td>
 							<td><?php echo escape($m['university_name']); ?></td>
-							<td><span class="major-code"><?php echo escape($m['code']); ?></span></td>
+                            <td><span class="major-code"><?php echo escape($m['code']); ?></span></td>
+                            <td><?php echo escape($m['moet_code'] ?? ''); ?></td>
 							<td><?php echo escape($m['name']); ?></td>
 							<td><?php echo escape($m['training_level']); ?></td>
 							<td><?php echo (int)$m['duration_years']; ?> năm</td>
-							<td><?php echo (int)$m['score_count']; ?></td>
+                            <td><?php echo $m['avg_score'] !== null ? formatScore($m['avg_score']) : 'N/A'; ?></td>
 							<td>
 								<a class="btn btn-success" href="?edit=<?php echo $m['id']; ?>">Sửa</a>
 								<a class="btn btn-primary" href="scores.php?major_id=<?php echo $m['id']; ?>">Điểm chuẩn</a>

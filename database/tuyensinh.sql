@@ -1,3 +1,25 @@
+-- Schema and seed for students table compatible with existing PHP code
+USE tuyensinh;
+
+CREATE TABLE IF NOT EXISTS students (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    email VARCHAR(120),
+    full_name VARCHAR(120),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create a sample student (username: student, password: password)
+INSERT INTO students (username, password, email, full_name)
+VALUES (
+    'student',
+    '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi',
+    'student@example.com',
+    'Sample Student'
+)
+ON DUPLICATE KEY UPDATE username = username;
+
 -- Database: university_management
 CREATE DATABASE IF NOT EXISTS university_management CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE university_management;

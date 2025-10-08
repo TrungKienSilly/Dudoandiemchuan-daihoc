@@ -1,10 +1,12 @@
 -- Dữ liệu mẫu cho hệ thống quản lý trường đại học
-USE university_management;
+USE tuyensinh;
 
--- Xóa dữ liệu cũ (nếu có)
-DELETE FROM admission_scores;
-DELETE FROM majors;
-DELETE FROM universities;
+-- Làm sạch dữ liệu cũ và reset AUTO_INCREMENT để đảm bảo id khớp
+SET FOREIGN_KEY_CHECKS=0;
+TRUNCATE TABLE admission_scores;
+TRUNCATE TABLE majors;
+TRUNCATE TABLE universities;
+SET FOREIGN_KEY_CHECKS=1;
 
 -- Thêm dữ liệu trường đại học
 INSERT INTO universities (name, code, province, address, website, phone, email, description, established_year, university_type) VALUES

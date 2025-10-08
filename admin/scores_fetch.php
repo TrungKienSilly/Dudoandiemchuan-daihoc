@@ -135,8 +135,8 @@ if ($_POST) {
         }
 
         // Chuẩn bị truy vấn
-        $findMajor = $pdo->prepare('SELECT id FROM majors WHERE university_id = ? AND (code = ? OR name = ?) LIMIT 1');
-        $insertMajor = $pdo->prepare('INSERT INTO majors (university_id, code, name) VALUES (?, ?, ?)');
+        $findMajor = $pdo->prepare('SELECT id FROM majors WHERE university_id = ? AND (code = ? OR moet_code = ? OR name = ?) LIMIT 1');
+        $insertMajor = $pdo->prepare('INSERT INTO majors (university_id, code, moet_code, name) VALUES (?, ?, ?, ?)');
 
         $upsertScore = $pdo->prepare('INSERT INTO admission_scores (major_id, year, block, min_score, quota, note) VALUES (?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE min_score = VALUES(min_score), quota = VALUES(quota), note = VALUES(note)');
 
@@ -162,12 +162,17 @@ if ($_POST) {
 
             // Sinh mã ngành an toàn nếu thiếu
             $safeCode = makeMajorCode($rawCode, $majorText);
+            // Nếu mã có dạng số 6-8 chữ số -> xem như mã MOET
+            $moetCandidate = '';
+            if (preg_match('/^\d{6,8}$/', $safeCode)) {
+                $moetCandidate = $safeCode;
+            }
 
             // Tìm/ tạo ngành
-            $findMajor->execute([$university_id, $safeCode, $majorText ?: $safeCode]);
+            $findMajor->execute([$university_id, $safeCode, $moetCandidate, $majorText ?: $safeCode]);
             $major = $findMajor->fetch();
             if (!$major) {
-                $insertMajor->execute([$university_id, $safeCode, $majorText ?: $safeCode]);
+                $insertMajor->execute([$university_id, $safeCode, ($moetCandidate ?: null), $majorText ?: $safeCode]);
                 $majorId = (int)$pdo->lastInsertId();
                 $summary['created_majors']++;
             } else {

@@ -8,7 +8,8 @@ $university_type = isset($_GET['university_type']) ? trim($_GET['university_type
 $major_name = isset($_GET['major_name']) ? trim($_GET['major_name']) : '';
 $min_score = isset($_GET['min_score']) ? (float)$_GET['min_score'] : 0;
 $max_score = isset($_GET['max_score']) ? (float)$_GET['max_score'] : 0;
-$year = isset($_GET['year']) ? (int)$_GET['year'] : date('Y');
+// Tạm thời để 0, sẽ set năm mới nhất có dữ liệu sau khi load danh sách năm
+$year = isset($_GET['year']) ? (int)$_GET['year'] : 0;
 
 $pdo = getDBConnection();
 
@@ -19,14 +20,19 @@ $provinces = $pdo->query($provinces_query)->fetchAll();
 // Lấy danh sách năm có dữ liệu
 $years_query = "SELECT DISTINCT year FROM admission_scores ORDER BY year DESC";
 $years = $pdo->query($years_query)->fetchAll();
+// Nếu người dùng không chọn năm, lấy năm mới nhất có trong CSDL
+if ($year === 0 && !empty($years)) {
+    $year = (int)$years[0]['year'];
+}
 
 // Xây dựng query tìm kiếm
 $where_conditions = [];
 $params = [];
 
 if (!empty($search)) {
-    $where_conditions[] = "(u.name LIKE :search OR u.code LIKE :search)";
-    $params[':search'] = "%$search%";
+    $where_conditions[] = "(u.name LIKE :search_name OR u.code LIKE :search_code)";
+    $params[':search_name'] = "%$search%";
+    $params[':search_code'] = "%$search%";
 }
 
 if (!empty($province)) {

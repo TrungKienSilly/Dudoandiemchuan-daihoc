@@ -1,4 +1,5 @@
 <?php
+session_start();
 require_once '../config/database.php';
 
 // Kiểm tra đăng nhập
@@ -50,97 +51,51 @@ $highest_scores = $pdo->query("
     LIMIT 10
 ")->fetchAll();
 
-$page_title = 'Admin Panel - Hệ thống quản lý trường đại học';
-$additional_css = '
-    <style>
-        .admin-header {
-            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-            color: white;
-            padding: 1rem 0;
-            margin-bottom: 2rem;
-        }
-        .admin-nav {
-            background: #34495e;
-            padding: 0.5rem 0;
-            margin-bottom: 2rem;
-        }
-        .admin-nav ul {
-            list-style: none;
-            display: flex;
-            justify-content: center;
-            gap: 2rem;
-        }
-        .admin-nav a {
-            color: white;
-            text-decoration: none;
-            padding: 0.5rem 1rem;
-            border-radius: 5px;
-            transition: background-color 0.3s ease;
-        }
-        .admin-nav a:hover {
-            background: #2c3e50;
-        }
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 2rem;
-            margin-bottom: 2rem;
-        }
-        .stat-card {
-            background: white;
-            padding: 2rem;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            text-align: center;
-        }
-        .stat-number {
-            font-size: 3rem;
-            font-weight: bold;
-            color: #2c3e50;
-            margin-bottom: 0.5rem;
-        }
-        .stat-label {
-            color: #666;
-            font-size: 1.1rem;
-        }
-        .data-table {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            overflow: hidden;
-            margin-bottom: 2rem;
-        }
-        .table-header {
-            background: #f8f9fa;
-            padding: 1.5rem;
-            border-bottom: 1px solid #eee;
-        }
-        .table-content {
-            padding: 1.5rem;
-        }
-        .logout-btn {
-            background: #e74c3c;
-            color: white;
-            padding: 0.5rem 1rem;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
-        }
-        .logout-btn:hover {
-            background: #c0392b;
-        }
-    </style>
-';
-include '../includes/header.php';
+$page_title = 'Quản trị - Hệ thống quản lý trường đại học';
 ?>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?php echo escape($page_title); ?></title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <style>
+        .admin-header { background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); color: #fff; padding: 1rem 0; margin-bottom: 2rem; }
+        .admin-nav { background: #34495e; padding: 0.5rem 0; margin-bottom: 2rem; }
+        .admin-nav ul { list-style: none; display: flex; justify-content: center; gap: 2rem; }
+        .admin-nav a { color: #fff; text-decoration: none; padding: 0.5rem 1rem; border-radius: 5px; transition: background-color .3s ease; }
+        .admin-nav a:hover { background: #2c3e50; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; margin-bottom: 2rem; }
+        .stat-card { background: #fff; padding: 2rem; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,.1); text-align: center; }
+        .stat-number { font-size: 3rem; font-weight: 700; color: #2c3e50; margin-bottom: .5rem; }
+        .stat-label { color: #666; font-size: 1.1rem; }
+        .data-table { background: #fff; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,.1); overflow: hidden; margin-bottom: 2rem; }
+        .table-header { background: #f8f9fa; padding: 1.5rem; border-bottom: 1px solid #eee; }
+        .table-content { padding: 1.5rem; }
+        .logout-btn { background: #e74c3c; color: #fff; padding: .5rem 1rem; border: none; border-radius: 5px; cursor: pointer; text-decoration: none; display: inline-block; }
+        .logout-btn:hover { background: #c0392b; }
+        /* Table styling */
+        .table { width: 100%; border-collapse: collapse; }
+        .table thead th { position: sticky; top: 0; background: #f8f9fa; z-index: 1; text-align: left; font-weight: 600; color: #4b5563; border-bottom: 1px solid #e5e7eb; }
+        .table th, .table td { padding: .75rem 1rem; border-bottom: 1px solid #f1f5f9; }
+        .table tbody tr:nth-child(even) { background: #fafafa; }
+        .table tbody tr:hover { background: #f3f4f6; }
+        .table .text-right { text-align: right; }
+        .badge { display: inline-block; padding: .25rem .5rem; border-radius: 999px; font-size: .85rem; line-height: 1; }
+        .badge-muted { background: #eef2ff; color: #4338ca; }
+        .badge-success { background: #dcfce7; color: #166534; }
+        .badge-warning { background: #fef9c3; color: #854d0e; }
+        .muted { color: #6b7280; font-size: .9rem; }
+    </style>
+</head>
+<body>
     <!-- Admin Header -->
     <header class="admin-header">
         <div class="container">
             <h1>🔧 Admin Panel</h1>
             <p>Quản lý hệ thống trường đại học tuyển sinh</p>
-            <div style="text-align: right; margin-top: 1rem;">
+            <div style="text-align:right; margin-top:1rem;">
                 <a href="logout.php" class="logout-btn">Đăng xuất</a>
             </div>
         </div>
@@ -158,7 +113,6 @@ include '../includes/header.php';
             </ul>
         </div>
     </nav>
-
     <div class="container">
         <!-- Statistics Cards -->
         <div class="stats-grid">
