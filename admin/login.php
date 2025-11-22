@@ -120,7 +120,7 @@ if ($_POST) {
 <body>
     <div class="login-container">
         <div class="login-header">
-            <h1>🔧 Admin Login</h1>
+            <h1>Admin Login</h1>
             <p>Đăng nhập để quản lý hệ thống</p>
         </div>
 

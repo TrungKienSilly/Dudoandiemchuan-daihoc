@@ -67,6 +67,11 @@ if ($_POST) {
 	}
 }
 
+// Phân trang
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$per_page = 5;
+$offset = ($page - 1) * $per_page;
+
 // Lọc theo trường và q
 $where = [];
 $params = [];
@@ -81,6 +86,13 @@ if ($q !== '') {
 }
 $whereSql = empty($where) ? '' : ('WHERE ' . implode(' AND ', $where));
 
+// Đếm tổng số
+$sqlCount = "SELECT COUNT(*) as total FROM majors m LEFT JOIN universities u ON m.university_id = u.id $whereSql";
+$stmtCount = $pdo->prepare($sqlCount);
+$stmtCount->execute($params);
+$total = $stmtCount->fetch()['total'];
+$total_pages = ceil($total / $per_page);
+
 // Lấy danh sách ngành
 $sql = "
     SELECT m.*, u.name as university_name, u.code as university_code,
@@ -89,6 +101,7 @@ $sql = "
     LEFT JOIN universities u ON m.university_id = u.id
     $whereSql
     ORDER BY COALESCE(u.name, ''), m.name
+    LIMIT $per_page OFFSET $offset
 ";
 $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
@@ -115,46 +128,91 @@ $show_form = isset($_GET['new']) || !empty($edit_major);
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Quản lý ngành - Admin</title>
 	<link rel="stylesheet" href="../assets/css/style.css">
+	<link rel="stylesheet" href="admin.css">
 	<style>
-		.admin-header{background:linear-gradient(135deg,#2c3e50 0%,#34495e 100%);color:#fff;padding:1rem 0;margin-bottom:2rem}
-		.admin-nav{background:#34495e;padding:.5rem 0;margin-bottom:2rem}
-		.admin-nav ul{list-style:none;display:flex;justify-content:center;gap:2rem}
-		.admin-nav a{color:#fff;text-decoration:none;padding:.5rem 1rem;border-radius:5px}
-		.admin-nav a:hover{background:#2c3e50}
-		.form-section{background:#fff;padding:2rem;border-radius:10px;box-shadow:0 5px 15px rgba(0,0,0,.1);margin-bottom:2rem}
-		.table-header{background:#f8f9fa;padding:1.5rem;border-bottom:1px solid #eee}
-		/* Button variants (đồng bộ với trang universities) */
-		.btn{padding:0.75rem 1.5rem;border:none;border-radius:5px;cursor:pointer;font-size:1rem;font-weight:500;text-decoration:none;display:inline-block;text-align:center;transition:all .3s ease}
-		.btn-primary{background:#2c3e50;color:#fff}
-		.btn-primary:hover{background:#34495e}
-		.btn-secondary{background:#6c757d;color:#fff}
-		.btn-secondary:hover{background:#5a6268}
-		.btn-danger{background:#dc3545;color:#fff}
-		.btn-danger:hover{background:#c82333}
-		.btn-success{background:#28a745;color:#fff}
-		.btn-success:hover{background:#218838}
+		.form-section { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 2rem; }
+		.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+		.form-group { margin-bottom: 1rem; }
+		.form-group label { display: block; margin-bottom: 0.5rem; color: #555; font-weight: 500; }
+		.form-group input, .form-group select, .form-group textarea { width: 100%; padding: 0.75rem; border: 2px solid #e1e5e9; border-radius: 8px; font-size: 1rem; transition: border-color 0.3s ease; }
+		.form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: #3498db; }
+		.form-group textarea { height: 100px; resize: vertical; }
+		.btn-group { display: flex; gap: 1rem; }
+		.btn { padding: 0.75rem 1.5rem; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem; font-weight: 500; text-decoration: none; display: inline-block; text-align: center; transition: all 0.3s ease; }
+		.btn-primary { background: #3498db; color: white; }
+		.btn-primary:hover { background: #2980b9; transform: translateY(-2px); }
+		.btn-secondary { background: #6c757d; color: white; }
+		.btn-secondary:hover { background: #5a6268; }
+		.btn-danger { background: #dc3545; color: white; }
+		.btn-danger:hover { background: #c82333; }
+		.btn-success { background: #28a745; color: white; }
+		.btn-success:hover { background: #218838; }
+		.search-box { margin-bottom: 2rem; }
+		.search-box input { width: 100%; max-width: 500px; padding: 0.75rem 1rem; border: 2px solid #e1e5e9; border-radius: 8px; font-size: 1rem; }
+		.search-box input:focus { outline: none; border-color: #3498db; }
+		.alert { padding: 1rem 1.5rem; border-radius: 8px; margin-bottom: 2rem; }
+		.alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+		.alert-error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+		.data-table { background: white; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); overflow: hidden; }
+		.table-header { background: #f8f9fa; padding: 1.5rem; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+		.table-content { overflow-x: auto; }
+		.score-table { width: 100%; border-collapse: collapse; white-space: nowrap; font-size: 0.95rem; }
+		.score-table th, .score-table td { padding: 0.6rem 0.8rem; text-align: left; border-bottom: 1px solid #eee; }
+		.score-table th { background: #f8f9fa; font-weight: 600; color: #555; }
+		.score-table tr:hover { background: #f8f9fa; }
+		.score-table th:nth-child(1), .score-table td:nth-child(1) { width: 50px; }
+		.score-table th:nth-child(2), .score-table td:nth-child(2) { max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+		.score-table th:nth-child(3), .score-table td:nth-child(3) { width: 90px; text-align: center; }
+		.score-table th:nth-child(4), .score-table td:nth-child(4) { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+		.score-table th:nth-child(5), .score-table td:nth-child(5) { width: 80px; text-align: center; }
+		.score-table th:nth-child(6), .score-table td:nth-child(6) { width: 80px; text-align: center; }
+		.score-table th:nth-child(7), .score-table td:nth-child(7) { width: 260px; }
+		.action-buttons { display: flex; gap: 0.4rem; flex-wrap: nowrap; }
+		.action-buttons .btn { padding: 0.4rem 0.8rem; font-size: 0.85rem; white-space: nowrap; }
 	</style>
 </head>
 <body>
-	<header class="admin-header">
-		<div class="container">
-			<h1>📚 Quản lý ngành</h1>
-		</div>
-	</header>
-	<nav class="admin-nav">
-		<div class="container">
-			<ul>
-				<li><a href="index.php">Dashboard</a></li>
-				<li><a href="universities.php">Quản lý trường</a></li>
-				<li><a href="majors.php">Quản lý ngành</a></li>
-				<li><a href="scores.php">Quản lý điểm chuẩn</a></li>
-				<li><a href="../index.php">Xem website</a></li>
-			</ul>
-		</div>
-	</nav>
-	<div class="container">
+	<div class="admin-wrapper">
+		<!-- Sidebar -->
+		<aside class="admin-sidebar">
+			<div class="admin-logo">
+				<h2>Admin Panel</h2>
+				<p>Quản lý tuyển sinh</p>
+			</div>
+			
+			<nav class="admin-menu">
+				<a href="index.php" class="menu-item">
+					Dashboard
+				</a>
+				<a href="universities.php" class="menu-item">
+					Quản lý trường
+				</a>
+				<a href="majors.php" class="menu-item active">
+					Quản lý ngành
+				</a>
+				<a href="scores.php" class="menu-item">
+					Quản lý điểm chuẩn
+				</a>
+				<a href="../search_score.php" class="menu-item">
+					Xem website
+				</a>
+			</nav>
+			
+			<div class="admin-logout">
+				<a href="logout.php" class="logout-btn">Đăng xuất</a>
+			</div>
+		</aside>
+
+		<!-- Main Content -->
+		<main class="admin-main">
+			<div class="admin-header-bar">
+				<h1>Quản lý ngành</h1>
+				<p>Thêm, sửa, xóa thông tin các ngành đào tạo</p>
+			</div>
+			<div class="admin-main-content">
+
 		<?php if ($message): ?>
-			<div class="alert alert-<?php echo $message_type; ?>" style="margin-bottom:1rem;\"><?php echo escape($message); ?></div>
+			<div class="alert alert-<?php echo $message_type; ?>" style="margin-bottom:1rem;"><?php echo escape($message); ?></div>
 		<?php endif; ?>
 
 		<!-- Filter -->
@@ -239,7 +297,7 @@ $show_form = isset($_GET['new']) || !empty($edit_major);
 		<?php endif; ?>
 
 		<div class="data-table">
-			<div class="table-header"><h2>Danh sách ngành (<?php echo count($majors); ?>)</h2></div>
+			<div class="table-header"><h2>Danh sách ngành (<?php echo $total; ?> - Trang <?php echo $page; ?>/<?php echo $total_pages; ?>)</h2></div>
 			<div class="table-content">
 				<table class="score-table">
 					<thead>
@@ -247,9 +305,7 @@ $show_form = isset($_GET['new']) || !empty($edit_major);
 							<th>STT</th>
 							<th>Trường</th>
                             <th>Mã ngành</th>
-                            <th>Mã MOET</th>
 							<th>Tên ngành</th>
-							<th>Trình độ</th>
 							<th>Thời gian</th>
                             <th>Điểm TB</th>
 							<th>Thao tác</th>
@@ -258,30 +314,82 @@ $show_form = isset($_GET['new']) || !empty($edit_major);
 					<tbody>
 						<?php foreach ($majors as $i => $m): ?>
 						<tr>
-							<td><?php echo $i+1; ?></td>
+							<td><?php echo $offset + $i+1; ?></td>
 							<td><?php echo escape($m['university_name']); ?></td>
                             <td><span class="major-code"><?php echo escape($m['code']); ?></span></td>
-                            <td><?php echo escape($m['moet_code'] ?? ''); ?></td>
 							<td><?php echo escape($m['name']); ?></td>
-							<td><?php echo escape($m['training_level']); ?></td>
 							<td><?php echo (int)$m['duration_years']; ?> năm</td>
                             <td><?php echo $m['avg_score'] !== null ? formatScore($m['avg_score']) : 'N/A'; ?></td>
 							<td>
-								<a class="btn btn-success" href="?edit=<?php echo $m['id']; ?>">Sửa</a>
-								<a class="btn btn-primary" href="scores.php?major_id=<?php echo $m['id']; ?>">Điểm chuẩn</a>
-								<form method="POST" style="display:inline" onsubmit="return confirm('Xóa ngành này?')">
-									<input type="hidden" name="action" value="delete">
-									<input type="hidden" name="id" value="<?php echo $m['id']; ?>">
-									<button class="btn btn-danger" type="submit">Xóa</button>
-								</form>
+								<div class="action-buttons">
+									<a class="btn btn-success" href="?edit=<?php echo $m['id']; ?>">Sửa</a>
+									<a class="btn btn-primary" href="scores.php?major_id=<?php echo $m['id']; ?>">Điểm chuẩn</a>
+									<form method="POST" style="display:inline" onsubmit="return confirm('Xóa ngành này?')">
+										<input type="hidden" name="action" value="delete">
+										<input type="hidden" name="id" value="<?php echo $m['id']; ?>">
+										<button class="btn btn-danger" type="submit">Xóa</button>
+									</form>
+								</div>
 							</td>
 						</tr>
 						<?php endforeach; ?>
 					</tbody>
 				</table>
 			</div>
+			
+			<!-- Pagination -->
+			<?php if ($total_pages > 1): ?>
+			<div style="padding: 1.5rem; display: flex; justify-content: center; gap: 0.5rem; align-items: center; font-size: 1rem;">
+				<?php if ($page > 1): ?>
+					<a href="?page=1<?php echo $selected_university_id ? '&university_id=' . $selected_university_id : ''; ?><?php echo $q ? '&q=' . urlencode($q) : ''; ?>" style="color: #3498db; text-decoration: none; padding: 0.5rem 0.75rem;">Trước</a>
+					<span style="color: #ccc;">|</span>
+				<?php else: ?>
+					<span style="color: #ccc; padding: 0.5rem 0.75rem;">Trước</span>
+					<span style="color: #ccc;">|</span>
+				<?php endif; ?>
+				
+				<?php 
+				$start = max(1, $page - 2);
+				$end = min($total_pages, $page + 2);
+				
+				if ($start > 1): ?>
+					<a href="?page=1<?php echo $selected_university_id ? '&university_id=' . $selected_university_id : ''; ?><?php echo $q ? '&q=' . urlencode($q) : ''; ?>" style="color: #3498db; text-decoration: none; padding: 0.5rem 0.75rem;">1</a>
+					<?php if ($start > 2): ?>
+						<span style="color: #666;">...</span>
+					<?php endif; ?>
+				<?php endif; ?>
+				
+				<?php for ($i = $start; $i <= $end; $i++): ?>
+					<?php if ($i == $page): ?>
+						<strong style="color: #2c3e50; padding: 0.5rem 0.75rem; background: #ecf0f1; border-radius: 4px;"><?php echo $i; ?></strong>
+					<?php else: ?>
+						<a href="?page=<?php echo $i; ?><?php echo $selected_university_id ? '&university_id=' . $selected_university_id : ''; ?><?php echo $q ? '&q=' . urlencode($q) : ''; ?>" style="color: #3498db; text-decoration: none; padding: 0.5rem 0.75rem;"><?php echo $i; ?></a>
+					<?php endif; ?>
+					<?php if ($i < $end): ?>
+						<span style="color: #ccc;">|</span>
+					<?php endif; ?>
+				<?php endfor; ?>
+				
+				<?php if ($end < $total_pages): ?>
+					<?php if ($end < $total_pages - 1): ?>
+						<span style="color: #666;">...</span>
+					<?php endif; ?>
+					<span style="color: #ccc;">|</span>
+					<a href="?page=<?php echo $total_pages; ?><?php echo $selected_university_id ? '&university_id=' . $selected_university_id : ''; ?><?php echo $q ? '&q=' . urlencode($q) : ''; ?>" style="color: #3498db; text-decoration: none; padding: 0.5rem 0.75rem;"><?php echo $total_pages; ?></a>
+				<?php endif; ?>
+				
+				<?php if ($page < $total_pages): ?>
+					<span style="color: #ccc;">|</span>
+					<a href="?page=<?php echo $total_pages; ?><?php echo $selected_university_id ? '&university_id=' . $selected_university_id : ''; ?><?php echo $q ? '&q=' . urlencode($q) : ''; ?>" style="color: #3498db; text-decoration: none; padding: 0.5rem 0.75rem;">Sau</a>
+				<?php else: ?>
+					<span style="color: #ccc;">|</span>
+					<span style="color: #ccc; padding: 0.5rem 0.75rem;">Sau</span>
+				<?php endif; ?>
+			</div>
+			<?php endif; ?>
 		</div>
+			</div>
+		</main>
 	</div>
-	<footer class="footer"><div class="container"><p>&copy; 2024 Hệ thống quản lý trường đại học.</p></div></footer>
 </body>
 </html>

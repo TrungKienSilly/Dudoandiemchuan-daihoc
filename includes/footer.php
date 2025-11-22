@@ -1,5 +1,8 @@
     </div>
 
+    <!-- Chat Bubble Widget -->
+    <?php include __DIR__ . '/chat_bubble.php'; ?>
+
     <!-- Footer -->
     <footer class="footer">
         <div class="container">

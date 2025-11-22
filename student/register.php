@@ -37,27 +37,10 @@ if ($_POST) {
 }
 
 $page_title = 'Đăng ký học sinh';
-$additional_css = '
-    <style>
-        .auth{max-width:520px;margin:60px auto;background:#fff;padding:2rem;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.08)}
-        .auth h1{margin:0 0 .75rem;color:#2c3e50}
-        .form-group{margin-bottom:1rem}
-        .form-group label{display:block;margin-bottom:.5rem;color:#555;font-weight:500}
-        .form-group input{width:100%;padding:.75rem;border:2px solid #e1e5e9;border-radius:5px;font-size:1rem}
-        .form-group input:focus{outline:none;border-color:#2c3e50}
-        .btn{width:100%;padding:.75rem;background:#28a745;color:#fff;border:none;border-radius:5px;font-size:1rem;font-weight:600;cursor:pointer}
-        .btn:hover{background:#218838}
-        .error{background:#f8d7da;color:#721c24;padding:.75rem;border-radius:5px;margin-bottom:1rem;border:1px solid #f5c6cb}
-        .success{background:#d4edda;color:#155724;padding:.75rem;border-radius:5px;margin-bottom:1rem;border:1px solid #c3e6cb}
-        .links{text-align:center;margin-top:1rem}
-        .links a{color:#2c3e50;text-decoration:none}
-        .links a:hover{text-decoration:underline}
-    </style>
-';
 include '../includes/header.php';
 ?>
     <div class="auth">
-        <h1>📝 Đăng ký học sinh</h1>
+        <h1>Đăng ký học sinh</h1>
         <?php if ($error): ?>
             <div class="error"><?php echo escape($error); ?></div>
         <?php endif; ?>

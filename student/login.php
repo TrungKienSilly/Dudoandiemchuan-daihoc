@@ -53,7 +53,7 @@ if ($_POST) {
     </style>
     <div class="login-container">
         <div class="login-header">
-            <h1>🎓 Đăng nhập học sinh</h1>
+            <h1>Đăng nhập học sinh</h1>
             <p>Truy cập để xem thông tin trường và điểm chuẩn chi tiết</p>
         </div>
         <?php if ($error): ?>

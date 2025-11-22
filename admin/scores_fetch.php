@@ -217,7 +217,7 @@ if ($_POST) {
     <a href="scores.php" class="btn btn-secondary back-btn">← Quay lại</a>
     <header class="admin-header">
         <div class="container">
-            <h1>⬇ Tải dữ liệu điểm chuẩn</h1>
+            <h1>Tải dữ liệu điểm chuẩn</h1>
             <p>Nhập URL trang chính thức của trường có bảng điểm chuẩn. Hệ thống sẽ cố gắng nhận diện và nhập dữ liệu.</p>
         </div>
     </header>
