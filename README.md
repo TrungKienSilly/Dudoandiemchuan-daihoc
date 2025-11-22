@@ -1,4 +1,4 @@
-# 🎓 Hệ thống Dự đoán Điểm chuẩn Đại học
+# Hệ thống Dự đoán Điểm chuẩn Đại học
 
 Hệ thống tra cứu và dự đoán điểm chuẩn tuyển sinh đại học với tích hợp AI thông minh, giúp thí sinh đưa ra quyết định chọn ngành, chọn trường phù hợp.
 
@@ -7,70 +7,70 @@ Hệ thống tra cứu và dự đoán điểm chuẩn tuyển sinh đại học
 [![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python)](https://www.python.org/)
 [![MySQL](https://img.shields.io/badge/MySQL-8.0+-4479A1?logo=mysql)](https://www.mysql.com/)
 
-## ✨ Tính năng chính
+## Tính năng chính
 
-### 🔍 Tra cứu thông tin
+### Tra cứu thông tin
 - **Tra cứu điểm chuẩn**: Xem điểm chuẩn các năm theo trường, ngành, khối thi
 - **Thông tin trường đại học**: Danh sách 10+ trường đại học lớn tại Việt Nam
 - **Thông tin ngành học**: Chi tiết 50+ ngành đào tạo phổ biến
 - **Lịch sử điểm chuẩn**: Theo dõi xu hướng điểm chuẩn qua các năm
 
-### 🤖 Dự đoán thông minh với AI
+### Dự đoán thông minh với AI
 - **Phân tích xu hướng**: AI phân tích xu hướng điểm chuẩn ngành học
 - **Đánh giá khả năng**: So sánh điểm thí sinh với điểm chuẩn
 - **Gợi ý 3 lời khuyên**: Tư vấn cụ thể về nguyện vọng và phương án dự phòng
 - **Kết luận**: Đề xuất nên giữ hay đổi nguyện vọng
 - **Hỗ trợ 2 AI**: Groq (Llama 3.3 70B) và Google Gemini 2.0 Flash
 
-### 💬 Chat AI tư vấn
+### Chat AI tư vấn
 - **Chat bubble**: Widget chat nổi ở góc phải màn hình
 - **Trả lời tức thì**: Hỏi đáp nhanh về tuyển sinh, ngành học, điểm chuẩn
 - **Câu hỏi gợi ý**: 3 câu hỏi thường gặp để bắt đầu hội thoại
 
-### 🎯 Dành cho học sinh
+### Dành cho học sinh
 - **Đăng ký/Đăng nhập**: Tài khoản cá nhân cho học sinh
 - **Lưu lịch sử**: Theo dõi các lần tra cứu và dự đoán
 - **Giao diện thân thiện**: Thiết kế hiện đại, dễ sử dụng
 
-### 🛠️ Dành cho quản trị viên
+### Dành cho quản trị viên
 - **Quản lý trường đại học**: Thêm, sửa, xóa thông tin trường
 - **Quản lý ngành học**: CRUD đầy đủ cho ngành đào tạo
 - **Quản lý điểm chuẩn**: Cập nhật điểm chuẩn hàng năm
 - **Dashboard**: Thống kê tổng quan hệ thống
 
-## 🏗️ Kiến trúc hệ thống
+## Kiến trúc hệ thống
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                    CLIENT (Browser)                      │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  │
-│  │   PHP Pages  │  │  JavaScript  │  │   CSS/HTML   │  │
-│  └──────────────┘  └──────────────┘  └──────────────┘  │
+│                    CLIENT (Browser)                     │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐   │
+│  │   PHP Pages  │  │  JavaScript  │  │   CSS/HTML   │   │
+│  └──────────────┘  └──────────────┘  └──────────────┘   │
 └─────────────────────────────────────────────────────────┘
                          │
                          ▼
 ┌─────────────────────────────────────────────────────────┐
-│                   BACKEND SERVERS                        │
+│                   BACKEND SERVERS                       │
 │  ┌────────────────────────┐  ┌────────────────────────┐ │
-│  │    PHP Backend          │  │  Python Flask AI API   │ │
-│  │  (Apache/WAMP)          │  │  (Port 5000)           │ │
-│  │  - User Management      │  │  - AI Analysis         │ │
-│  │  - Data Processing      │  │  - Chat Bot            │ │
-│  │  - Admin Functions      │  │  - Groq Integration    │ │
+│  │    PHP Backend         │  │  Python Flask AI API   │ │
+│  │  (Apache/WAMP)         │  │  (Port 5000)           │ │
+│  │  - User Management     │  │  - AI Analysis         │ │
+│  │  - Data Processing     │  │  - Chat Bot            │ │
+│  │  - Admin Functions     │  │  - Groq Integration    │ │
 │  └────────────────────────┘  └────────────────────────┘ │
 └─────────────────────────────────────────────────────────┘
                          │
                          ▼
-┌─────────────────────────────────────────────────────────┐
-│                  DATABASE & AI SERVICES                  │
+┌────────────────────────────────────────────────────────┐
+│                  DATABASE & AI SERVICES                │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  │
 │  │   MySQL DB   │  │  Groq API    │  │  Gemini API  │  │
 │  │  - 4 tables  │  │  (Primary)   │  │  (Fallback)  │  │
 │  └──────────────┘  └──────────────┘  └──────────────┘  │
-└─────────────────────────────────────────────────────────┘
+└────────────────────────────────────────────────────────┘
 ```
 
-## 🗄️ Cấu trúc Database
+## Cấu trúc Database
 
 ### Bảng `universities` (Thông tin trường đại học)
 ```sql
@@ -130,7 +130,7 @@ Hệ thống tra cứu và dự đoán điểm chuẩn tuyển sinh đại học
 - role: ENUM('admin', 'moderator')
 ```
 
-## 📁 Cấu trúc thư mục
+## Cấu trúc thư mục
 
 ```
 tuyensinh/
@@ -184,7 +184,7 @@ tuyensinh/
 └── .gitignore               # Git ignore rules
 ```
 
-## 🚀 Cài đặt và Triển khai
+## Cài đặt và Triển khai
 
 ### Yêu cầu hệ thống
 
@@ -276,7 +276,7 @@ Server sẽ chạy tại `http://localhost:5000`
    - Admin: `http://localhost/tuyensinh/admin/`
    - Student: `http://localhost/tuyensinh/student/`
 
-## 🔑 Tài khoản mặc định
+## Tài khoản mặc định
 
 ### Quản trị viên
 - **Username**: `admin`
@@ -286,9 +286,9 @@ Server sẽ chạy tại `http://localhost:5000`
 - **Username**: `student`
 - **Password**: `password`
 
-⚠️ **Lưu ý**: Đổi mật khẩu ngay sau khi đăng nhập lần đầu!
+**Lưu ý**: Đổi mật khẩu ngay sau khi đăng nhập lần đầu!
 
-## 📚 API Documentation
+## API Documentation
 
 ### Python Flask AI API
 
@@ -382,7 +382,7 @@ Lấy danh sách khối thi của ngành
 }
 ```
 
-## 🎨 Giao diện người dùng
+## Giao diện người dùng
 
 ### Trang chủ
 - Banner với thông tin hệ thống
@@ -413,7 +413,7 @@ Lấy danh sách khối thi của ngành
 - CRUD forms với validation
 - Bảng dữ liệu với search và pagination
 
-## 🔧 Cấu hình nâng cao
+## Cấu hình nâng cao
 
 ### Thay đổi AI Provider mặc định
 
@@ -441,7 +441,7 @@ INSERT INTO universities (name, code, province, address, website, phone, email, 
 VALUES ('Tên trường', 'CODE', 'Tỉnh/TP', 'Địa chỉ', 'website', 'phone', 'email', 'Mô tả', 2000, 'Công lập');
 ```
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Lỗi: "Cannot connect to AI server"
 - Kiểm tra Python server có đang chạy: `python ai_api.py`
@@ -464,7 +464,7 @@ VALUES ('Tên trường', 'CODE', 'Tỉnh/TP', 'Địa chỉ', 'website', 'phone
 - Xem Console log (F12) có lỗi JavaScript không
 - Đảm bảo `includes/footer.php` đã include chat_bubble
 
-## 🤝 Đóng góp
+## Đóng góp
 
 Chúng tôi hoan nghênh mọi đóng góp! Để contribute:
 
@@ -480,15 +480,15 @@ Chúng tôi hoan nghênh mọi đóng góp! Để contribute:
 - **JavaScript**: ES6+ syntax
 - **SQL**: Sử dụng prepared statements, tránh SQL injection
 
-## 📝 License
+## License
 
 Dự án này được phát hành dưới [MIT License](LICENSE).
 
-## 👥 Tác giả
+## Tác giả
 
 - **TrungKienSilly** - [GitHub](https://github.com/TrungKienSilly)
 
-## 🙏 Lời cảm ơn
+## Lời cảm ơn
 
 - [Google Gemini](https://ai.google.dev/) - AI API
 - [Groq](https://groq.com/) - Fast inference AI
@@ -496,7 +496,7 @@ Dự án này được phát hành dưới [MIT License](LICENSE).
 - [Bootstrap](https://getbootstrap.com/) - CSS framework (nếu dùng)
 - Cộng đồng developers Việt Nam
 
-## 📞 Liên hệ & Hỗ trợ
+## Liên hệ và Hỗ trợ
 
 - **Repository**: https://github.com/TrungKienSilly/Dudoandiemchuan-daihoc
 - **Issues**: https://github.com/TrungKienSilly/Dudoandiemchuan-daihoc/issues
@@ -504,4 +504,4 @@ Dự án này được phát hành dưới [MIT License](LICENSE).
 
 ---
 
-⭐ Nếu dự án hữu ích, hãy cho một Star để ủng hộ! ⭐
+Nếu dự án hữu ích, hãy cho một Star để ủng hộ!
