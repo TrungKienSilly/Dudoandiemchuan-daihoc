@@ -193,7 +193,7 @@ $show_form = isset($_GET['new']) || !empty($edit_major);
 				<a href="scores.php" class="menu-item">
 					Quản lý điểm chuẩn
 				</a>
-				<a href="../search_score.php" class="menu-item">
+				<a href="../search_score" class="menu-item">
 					Xem website
 				</a>
 			</nav>

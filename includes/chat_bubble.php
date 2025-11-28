@@ -344,14 +344,19 @@
 
 <!-- Chat Bubble Button -->
 <button class="chat-bubble-btn" id="chatBubbleBtn" title="Chat với AI">
-    <img src="<?php echo $base_path ?? ''; ?>img/box-chat.jpg" alt="Chat AI">
+    <img src="<?php echo (isset($base_path) ? $base_path : ''); ?>img/box-chat.jpg" alt="Chat AI">
+</button>
+
+<!-- Back to Top Button (left bottom) -->
+<button class="back-to-top" id="backToTopBtn" aria-label="Quay về đầu trang" title="Quay về đầu trang">
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 4l-6 6h4v6h4v-6h4z"></path></svg>
 </button>
 
 <!-- Chat Box -->
 <div class="chat-box-container" id="chatBox">
     <div class="chat-header">
         <div>
-            <h3>🤖 AI Tư vấn</h3>
+            <h3> AI Tư vấn</h3>
             <small style="opacity: 0.9;">Trợ lý tuyển sinh thông minh</small>
         </div>
         <button class="close-btn" id="closeChatBtn">×</button>
@@ -359,7 +364,7 @@
     
     <div class="chat-messages" id="chatMessages">
         <div class="welcome-message">
-            <h4>Xin chào! 👋</h4>
+            <h4>Xin chào! </h4>
             <p>Tôi là trợ lý AI. Tôi có thể giúp bạn:</p>
             <div class="quick-questions">
                 <button class="quick-question-btn" onclick="sendQuickQuestion('Điểm chuẩn năm nay thay đổi thế nào?')">
@@ -407,6 +412,7 @@ const closeChatBtn = document.getElementById('closeChatBtn');
 const chatMessages = document.getElementById('chatMessages');
 const chatInput = document.getElementById('chatInput');
 const chatSendBtn = document.getElementById('chatSendBtn');
+const backToTopBtn = document.getElementById('backToTopBtn');
 
 let isFirstMessage = true;
 
@@ -465,7 +471,26 @@ async function sendMessage() {
         // Call AI API
         console.log('[CHAT DEBUG] Sending message:', message);
         
-        const response = await fetch('http://localhost:5000/chat', {
+    // Build API path using global BASE_PATH (in header) or fallback to relative path
+    // Compute app root if BASE_PATH isn't provided by server
+    function getAppRootChat() {
+        if (typeof window !== 'undefined' && window.BASE_PATH && window.BASE_PATH.charAt(0) === '/') return window.BASE_PATH;
+        // Use stylesheet href to detect app root (assets path is a reliable marker)
+        try {
+            var link = document.querySelector('link[href*="/assets/"]');
+            if (link && link.href) {
+                var pathOnly = link.getAttribute('href');
+                try { pathOnly = new URL(link.href, window.location.origin).pathname; } catch (e) {}
+                var idx = pathOnly.indexOf('/assets/');
+                if (idx !== -1) return pathOnly.substring(0, idx+1);
+            }
+        } catch (e) {}
+        return '/';
+    }
+    // Use clean endpoint name without '.php' to avoid server 301 redirects that might change request method
+    const CHAT_API_URL = (window.location.origin || (window.location.protocol + '//' + window.location.host)) + getAppRootChat() + 'ai_chat';
+    console.log('CHAT_API_URL computed as', CHAT_API_URL);
+    const response = await fetch(CHAT_API_URL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -477,13 +502,21 @@ async function sendMessage() {
         });
         
         console.log('[CHAT DEBUG] Response status:', response.status);
-        const data = await response.json();
+        // read text then parse, to avoid crash if server returns stray HTML or warnings
+        const rawText = await response.text();
+        let data;
+        try {
+            data = JSON.parse(rawText);
+        } catch (jsonErr) {
+            console.error('[CHAT DEBUG] Invalid JSON from server', rawText.substr(0, 500));
+            data = { success: false, error: 'Invalid response from AI server' };
+        }
         console.log('[CHAT DEBUG] Response data:', data);
         
         // Hide typing indicator
         hideTypingIndicator();
         
-        if (data.success) {
+    if (data && data.success) {
             console.log('[CHAT DEBUG] Adding bot message:', data.response);
             addMessage(data.response, 'bot');
         } else {
@@ -493,7 +526,7 @@ async function sendMessage() {
     } catch (error) {
         console.error('[CHAT DEBUG] Catch error:', error);
         hideTypingIndicator();
-        addMessage('Không thể kết nối với AI. Vui lòng kiểm tra server Python đang chạy.', 'bot');
+        addMessage('Không thể kết nối với AI. Vui lòng thử lại sau.', 'bot');
     } finally {
         // Re-enable input
         chatInput.disabled = false;
@@ -548,4 +581,22 @@ document.addEventListener('click', (e) => {
         }
     }
 });
+
+// Back to Top Button behavior
+if (backToTopBtn) {
+    // Show when scrolled down
+    function updateBackToTop() {
+        if (window.pageYOffset > 300) {
+            backToTopBtn.classList.add('show');
+        } else {
+            backToTopBtn.classList.remove('show');
+        }
+    }
+    window.addEventListener('scroll', updateBackToTop);
+    // init
+    updateBackToTop();
+    backToTopBtn.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+}
 </script>

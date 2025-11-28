@@ -19,8 +19,8 @@ $stats['total_universities'] = $pdo->query("SELECT COUNT(*) as count FROM univer
 // Tổng số ngành
 $stats['total_majors'] = $pdo->query("SELECT COUNT(*) as count FROM majors")->fetch()['count'];
 
-// Tổng số điểm chuẩn
-$stats['total_scores'] = $pdo->query("SELECT COUNT(*) as count FROM admission_scores")->fetch()['count'];
+// Tổng số chỉ tiêu (tổng quota trên admission_scores)
+$stats['total_quota'] = $pdo->query("SELECT COALESCE(SUM(quota),0) as total_quota FROM admission_scores")->fetch()['total_quota'];
 
 // Số trường theo loại
 $university_types = $pdo->query("
@@ -84,7 +84,7 @@ $page_title = 'Quản trị - Hệ thống quản lý trường đại học';
                 <a href="scores.php" class="menu-item">
                     Quản lý điểm chuẩn
                 </a>
-                <a href="../search_score.php" class="menu-item">
+                <a href="../search_score" class="menu-item">
                     Xem website
                 </a>
             </nav>
@@ -111,8 +111,8 @@ $page_title = 'Quản trị - Hệ thống quản lý trường đại học';
                 <div class="stat-label">Tổng số ngành đào tạo</div>
             </div>
             <div class="stat-card">
-                <div class="stat-number"><?php echo formatNumber($stats['total_scores']); ?></div>
-                <div class="stat-label">Tổng số điểm chuẩn</div>
+                <div class="stat-number"><?php echo formatNumber($stats['total_quota']); ?></div>
+                <div class="stat-label">Tổng số chỉ tiêu</div>
             </div>
         </div>
 

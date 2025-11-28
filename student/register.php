@@ -71,7 +71,7 @@ include '../includes/header.php';
             <button class="btn" type="submit">Đăng ký</button>
         </form>
         <div class="links">
-            <a href="login.php">← Đăng nhập</a>
+            <a href="login">← Đăng nhập</a>
         </div>
     </div>
 

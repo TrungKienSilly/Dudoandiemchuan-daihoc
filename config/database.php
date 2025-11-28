@@ -1,10 +1,27 @@
 <?php
-// Cấu hình database
-define('DB_HOST', 'localhost');
-define('DB_USER', 'root');
-define('DB_PASS', '');
-define('DB_NAME', 'tuyensinh');
-
+// Database configuration - prefer environment variables for hosting.
+// On production/hosting, set DB_HOST, DB_USER, DB_PASS, DB_NAME via environment or a .env file.
+// If none provided, fallback to local defaults for dev.
+// If there's a .env file in project root, load it to populate environment variables
+if (file_exists(__DIR__ . '/../.env')) {
+    $envFile = file(__DIR__ . '/../.env', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    foreach ($envFile as $line) {
+        if (strpos($line, '=') !== false && strpos(trim($line), '#') !== 0) {
+            list($key, $value) = explode('=', $line, 2);
+            $key = trim($key);
+            $value = trim($value);
+            if (!empty($key) && !isset($_ENV[$key])) {
+                $_ENV[$key] = $value;
+                putenv("$key=$value");
+            }
+        }
+    }
+}
+define('DB_HOST', getenv('DB_HOST') ?: 'localhost');
+define('DB_USER', getenv('DB_USER') ?: 'root');
+define('DB_PASS', getenv('DB_PASS') ?: '');
+define('DB_NAME', getenv('DB_NAME') ?: getenv('HOST_DB_NAME') ?: 'tuyensinh');
+// Try DB_NAME from environment first; common hosted DB name: rbsuhnpw_tuyensinh
 // Hàm kết nối database
 function getDBConnection() {
     try {
@@ -116,7 +133,8 @@ function getDBConnection() {
         }
         return $pdo;
     } catch (PDOException $e) {
-        die("Lỗi kết nối database: " . $e->getMessage());
+        // Don't die/echo direct text here - throw an exception so callers can handle JSON or HTML
+        throw new PDOException("Lỗi kết nối database: " . $e->getMessage(), (int)$e->getCode());
     }
 }
 

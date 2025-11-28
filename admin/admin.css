@@ -13,7 +13,7 @@ body {
 
 /* Sidebar - 3 columns */
 .admin-sidebar {
-    width: 25%;
+    width: 240px; /* fixed width like the mocked UI */
     background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
     color: white;
     position: fixed;
@@ -94,8 +94,8 @@ body {
 
 /* Main Content - 7 columns */
 .admin-main {
-    margin-left: 25%;
-    width: 75%;
+    margin-left: 240px;
+    width: calc(100% - 240px);
     padding: 2rem;
 }
 
@@ -128,12 +128,19 @@ body {
 
 .stat-card { 
     background: white; 
-    padding: 2rem; 
+    padding: 1.1rem 1.4rem; 
     border-radius: 12px; 
     box-shadow: 0 2px 8px rgba(0,0,0,0.08); 
     transition: all 0.3s ease;
-    text-align: center;
+    text-align: left;
+    display:flex; align-items:center; gap:14px;
 }
+
+.stat-card .icon-wrap {
+    display:inline-flex; align-items:center; justify-content:center; width:60px; height:60px; border-radius:12px; background:#eef6fb; color:#2b6aa6; font-size:24px; flex-shrink:0;
+}
+.stat-card .stat-number { display:block; font-size:1.8rem; color:#2b6aa6; font-weight:800; }
+.stat-card .stat-label { color:#6b7280; font-size:0.95rem; }
 
 .stat-card:hover {
     transform: translateY(-4px);
@@ -181,16 +188,28 @@ body {
     border-collapse: collapse; 
 }
 
+/* Header filter toolbar styles */
+.admin-filter-bar {
+    margin-top: 14px;
+    display:flex; gap:12px; align-items:center;
+}
+.admin-filter-bar .filter-inputs{ display:flex; flex-direction:column; gap:6px;}
+.admin-filter-bar label{ font-size:0.85rem; color:#6b7280; }
+.admin-filter-bar input[type=date]{ padding:8px 10px; border-radius:8px; border:1px solid #e5e7eb; }
+.admin-filter-bar .filter-actions{ margin-left:auto; }
+.admin-filter-bar .btn-primary{ background:linear-gradient(135deg,#2b9bd1,#176aa6); color:white; padding:8px 14px; border-radius:8px; border:none; }
+.admin-filter-bar .btn-primary:hover{ filter:brightness(0.95); }
+
 .table thead th { 
     background: #f8f9fa; 
     text-align: left; 
     font-weight: 600; 
     color: #4b5563; 
-    padding: 1rem 2rem;
+    padding: 0.8rem 1rem;
 }
 
 .table th, .table td { 
-    padding: 1rem 2rem; 
+    padding: 0.8rem 1rem; 
     border-bottom: 1px solid #f1f5f9; 
 }
 

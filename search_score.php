@@ -22,8 +22,17 @@ $year = isset($_GET['year']) ? (int)$_GET['year'] : (int)$years[0]['year'];
 
 // Phân trang
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-$limit = 20;
+// Show 5 items per page across the app
+$limit = 5;
 $offset = ($page - 1) * $limit;
+
+// Detect homepage state: no filters and on first page
+$isHome = (
+    $search === '' && $province === '' && $university_type === '' && $major_name === '' &&
+    $min_score === 0 && $max_score === 30 && $page === 1
+);
+
+// If homepage we still label it as Top 5 using $isHome but limit remains 5 for all pages
 
 // Query tìm theo điểm
 $where_conditions = [];
@@ -261,9 +270,9 @@ include 'includes/header.php';
 <div class="container mt-80">
     <div class="search-container">
         <div class="search-tabs">
-            <a href="search_score.php" class="search-tab active">Tìm theo điểm</a>
-            <a href="search_university.php" class="search-tab">Tìm theo trường</a>
-            <a href="search_major.php" class="search-tab">Tìm theo ngành</a>
+            <a href="search_score" class="search-tab active">Tìm theo điểm</a>
+            <a href="search_university" class="search-tab">Tìm theo trường</a>
+            <a href="search_major" class="search-tab">Tìm theo ngành</a>
         </div>
 
         <form method="GET" id="searchForm" class="search-form-new">
@@ -333,9 +342,16 @@ include 'includes/header.php';
         </form>
 
         <?php if ($_SERVER['REQUEST_METHOD'] === 'GET'): ?>
-            <div class="results-summary">
-                Tìm thấy <strong><?php echo formatNumber($total_results); ?></strong> ngành học với điểm chuẩn từ <?php echo $min_score; ?> đến <?php echo $max_score; ?>
-            </div>            <style>
+            <?php if ($isHome): ?>
+                <div class="results-summary">
+                    <strong>Top <?php echo $limit; ?> ngành có điểm cao nhất</strong> năm <?php echo escape($year); ?>
+                </div>
+            <?php else: ?>
+                <div class="results-summary">
+                    Tìm thấy <strong><?php echo formatNumber($total_results); ?></strong> ngành học với điểm chuẩn từ <?php echo $min_score; ?> đến <?php echo $max_score; ?>
+                </div>
+            <?php endif; ?>
+            <style>
                 /* Styles cho result cards */
                 .result-card {
                     background: white;

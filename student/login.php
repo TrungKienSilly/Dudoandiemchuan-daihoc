@@ -73,6 +73,6 @@ if ($_POST) {
         </form>
         <div class="links">
             <a href="<?php echo escape($redirectAfter ?: '../index.php'); ?>">← Quay lại</a>
-            <a href="register.php">Đăng ký tài khoản</a>
+            <a href="register">Đăng ký tài khoản</a>
         </div>
     </div>

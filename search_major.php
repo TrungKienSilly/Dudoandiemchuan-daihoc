@@ -208,9 +208,9 @@ include 'includes/header.php';
 <div class="container mt-80">
     <div class="search-container">
         <div class="search-tabs">
-            <a href="search_score.php" class="search-tab">Tìm theo điểm</a>
-            <a href="search_university.php" class="search-tab">Tìm theo trường</a>
-            <a href="search_major.php" class="search-tab active">Tìm theo ngành</a>
+            <a href="search_score" class="search-tab">Tìm theo điểm</a>
+            <a href="search_university" class="search-tab">Tìm theo trường</a>
+            <a href="search_major" class="search-tab active">Tìm theo ngành</a>
         </div>
 
         <form method="GET" id="searchForm" class="search-form-new">

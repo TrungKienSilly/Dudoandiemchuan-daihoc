@@ -1,0 +1,20 @@
+# Enable mod_rewrite
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  # Ensure we keep the directory index default
+  DirectoryIndex index.php index.html
+
+  # Ignore real files and directories
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+
+  # If adding .php makes it a valid file, rewrite to it
+  RewriteCond %{REQUEST_FILENAME}.php -f
+  RewriteRule ^(.*)$ $1.php [L,QSA]
+
+  # Redirect *.php requests to clean URLs (skip if path starts with /admin or /student to avoid admin/login redirects)
+  # Skip redirecting .php -> clean URL for admin, student and API endpoints to preserve request method
+  RewriteCond %{REQUEST_URI} !^/(admin|student|api_|ai_)/ [NC]
+  RewriteCond %{THE_REQUEST} \s([^\s]+)\.php[\s?] [NC]
+  RewriteRule ^ %1 [R=301,L]
+</IfModule>

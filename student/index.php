@@ -13,7 +13,7 @@ include '../includes/header.php';
         <h1>Chào, <?php echo escape($_SESSION['student_username'] ?? 'Học sinh'); ?>!</h1>
         <p>Bạn đã đăng nhập thành công. Bạn có thể tra cứu trường/ngành và xem điểm chuẩn mới nhất.</p>
         <div class="actions">
-            <a class="btn btn-primary" href="../search_score.php">Tìm kiếm trường/ngành</a>
+            <a class="btn btn-primary" href="../search_score">Tìm kiếm trường/ngành</a>
             <a class="btn btn-secondary" href="logout.php">Đăng xuất</a>
         </div>
     </div>

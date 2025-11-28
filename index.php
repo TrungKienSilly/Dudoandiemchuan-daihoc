@@ -1,5 +1,5 @@
 <?php
 // Redirect to search by score page (new home page)
-header('Location: search_score.php');
+header('Location: search_score');
 exit;
 ?>

@@ -211,6 +211,13 @@ include 'includes/header.php';
         <h1>Dự đoán khả năng đậu đại học</h1>
         <p>Nhập điểm số và nguyện vọng của bạn để dự đoán khả năng trúng tuyển</p>
     </div>
+    <?php if (empty($universities)): ?>
+        <div class="info-box warning">
+            <h4>Chưa có dữ liệu trường/ ngành</h4>
+            <p>Hệ thống hiện chưa có dữ liệu trường hoặc ngành. Vui lòng import dữ liệu bằng cách truy cập trang quản trị hoặc import file <strong>database/tuyensinh.sql</strong> trên database <strong><?php echo DB_NAME; ?></strong>.</p>
+            <p><a href="<?php echo $base_path; ?>admin/">Đăng nhập quản trị</a> để thêm dữ liệu hoặc dùng <a href="<?php echo $base_path; ?>database/tuyensinh.sql">file SQL mẫu</a>.</p>
+        </div>
+    <?php endif; ?>
     
     <?php if ($error_message): ?>
         <div class="alert-error">
@@ -359,207 +366,188 @@ include 'includes/header.php';
                     <?php endforeach; ?>
                 </tbody>
             </table>
-            
-            
-            <!-- Nút gọi AI phân tích (ẩn đi vì sẽ tự động gọi) -->
-            <div id="aiAnalysisBtn" style="display: none;">
-                <!-- Button sẽ tự động trigger khi trang load -->
-            </div>
-            
-            <!-- Khu vực hiển thị kết quả AI -->
-            <div id="aiAnalysisContainer" style="display: none;">
-                <!-- Loading state -->
-                <div id="aiLoading" class="info-box" style="background: #e7f3ff; border-left: 4px solid #2196F3; display: none;">
-                    <h4 style="margin: 0 0 10px 0; color: #1976D2;">Đang phân tích...</h4>
-                    <p style="margin: 0; color: #1976D2;">AI đang xử lý dữ liệu của bạn. Vui lòng đợi trong giây lát...</p>
-                    <div style="margin-top: 10px;">
-                        <div style="width: 100%; height: 4px; background: #bbdefb; border-radius: 2px; overflow: hidden;">
-                            <div style="width: 30%; height: 100%; background: #2196F3; animation: loading 1.5s infinite;"></div>
+
+                        <!-- Nút gọi AI phân tích (ẩn đi vì sẽ tự động gọi) -->
+                        <div id="aiAnalysisBtn" style="display: inline-block;">
+                            <button id="aiAnalyzeTrigger" class="btn-predict" style="background:#6b4bd6;padding:8px 12px;border-radius:8px;color:#fff;border:none;cursor:pointer">Phân tích bằng AI</button>
                         </div>
-                    </div>
-                </div>
+            
+                        <!-- Khu vực hiển thị kết quả AI -->
+                        <div id="aiAnalysisContainer" style="display: none;">
+                            <!-- Loading state -->
+                            <div id="aiLoading" class="info-box" style="display: none;">
+                                <h4>Đang phân tích...</h4>
+                                <p>AI đang xử lý dữ liệu của bạn. Vui lòng đợi trong giây lát...</p>
+                            </div>
                 
-                <!-- Success state -->
-                <div id="aiSuccess" style="display: none;">
-                    <div class="info-box" style="background: #d4edda; border-left: 4px solid #28a745; padding: 15px; margin: 20px 0; border-radius: 8px;">
-                        <h4 style="margin: 0 0 10px 0; color: #155724;">AI phân tích thành công!</h4>
-                        <p style="margin: 0; color: #155724;">AI đã phân tích dữ liệu và đưa ra nhận định chi tiết.</p>
-                    </div>
+                            <!-- Success state -->
+                            <div id="aiSuccess" style="display: none;">
+                                <div class="info-box success">
+                                    <h4>AI phân tích thành công!</h4>
+                                    <p>AI đã phân tích dữ liệu và đưa ra nhận định chi tiết.</p>
+                                </div>
                     
-                    <div class="ai-analysis-section">
-                        <h3>Phân tích từ AI</h3>
+                                <div class="ai-analysis-section">
+                                    <h3>Phân tích từ AI</h3>
                         
-                        <div id="aiTrendAnalysis" class="ai-card trend-card" style="display: none;">
-                            <h4>Phân tích xu hướng</h4>
-                            <p id="trendText"></p>
-                        </div>
+                                    <div id="aiTrendAnalysis" class="ai-card trend-card" style="display: none;">
+                                        <h4>Phân tích xu hướng</h4>
+                                        <p id="trendText"></p>
+                                    </div>
                         
-                        <div id="aiRecommendations" class="ai-card recommendations-card" style="display: none;">
-                            <h4>Lời khuyên từ AI</h4>
-                            <ul id="recommendationsList"></ul>
-                        </div>
+                                    <div id="aiRecommendations" class="ai-card recommendations-card" style="display: none;">
+                                        <h4>Lời khuyên từ AI</h4>
+                                        <ul id="recommendationsList"></ul>
+                                    </div>
                         
-                        <div id="aiConclusion" class="ai-card conclusion-card" style="display: none;">
-                            <h4>Kết luận</h4>
-                            <p id="conclusionText"></p>
-                        </div>
-                    </div>
-                </div>
+                                    <div id="aiConclusion" class="ai-card conclusion-card" style="display: none;">
+                                        <h4>Kết luận</h4>
+                                        <p id="conclusionText"></p>
+                                    </div>
+                                </div>
+                            </div>
                 
-                <!-- Error state -->
-                <div id="aiError" class="info-box" style="background: #fff3cd; border-left: 4px solid #ffc107; display: none;">
-                    <h4 style="margin: 0 0 10px 0; color: #856404;">Không thể kết nối với AI</h4>
-                    <p id="errorMessage" style="margin: 0; color: #856404;"></p>
-                    <p style="margin: 10px 0 0 0; font-size: 0.9em; color: #856404;">
-                        <em>Có thể do rate limit (quá 15 requests/phút) hoặc server đang bận. Vui lòng thử lại sau vài phút.</em>
-                    </p>
-                </div>
-            </div>
+                            <!-- Error state -->
+                            <div id="aiError" class="info-box error" style="display: none;">
+                                <h4>Không thể kết nối với AI</h4>
+                                <p id="errorMessage"></p>
+                                <p class="small"><em>Có thể do rate limit (quá 15 requests/phút) hoặc server đang bận. Vui lòng thử lại sau vài phút.</em></p>
+                            </div>
+                        </div>
             
-            <?php if (isset($prediction_result['ai_status'])): ?>
-                <?php if ($prediction_result['ai_status'] === 'unavailable'): ?>
-                    <div class="info-box" style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0; border-radius: 8px;">
-                        <h4 style="margin: 0 0 10px 0; color: #856404;">Thông báo về AI:</h4>
-                        <p style="margin: 0; color: #856404;"><?php echo $prediction_result['ai_debug']; ?></p>
-                        <p style="margin: 10px 0 0 0; font-size: 0.9em; color: #856404;">
-                            <em>Hệ thống đã thử kết nối 3 lần nhưng không thành công. Kết quả dự đoán vẫn chính xác dựa trên dữ liệu lịch sử 5 năm.</em>
-                        </p>
-                    </div>
-                <?php elseif ($prediction_result['ai_status'] === 'success'): ?>
-                    <div class="info-box" style="background: #d4edda; border-left: 4px solid #28a745; padding: 15px; margin: 20px 0; border-radius: 8px;">
-                        <h4 style="margin: 0 0 10px 0; color: #155724;">AI phân tích thành công!</h4>
-                        <p style="margin: 0; color: #155724;">AI đã phân tích dữ liệu và đưa ra nhận định chi tiết bên dưới.</p>
+                        <?php if (isset($prediction_result['ai_status'])): ?>
+                            <?php if ($prediction_result['ai_status'] === 'unavailable'): ?>
+                                <div class="info-box warning">
+                                    <h4>Thông báo về AI:</h4>
+                                    <p><?php echo $prediction_result['ai_debug']; ?></p>
+                                    <p class="small"><em>Hệ thống đã thử kết nối nhưng không thành công. Kết quả dự đoán vẫn chính xác dựa trên dữ liệu lịch sử 5 năm.</em></p>
+                                </div>
+                            <?php elseif ($prediction_result['ai_status'] === 'success'): ?>
+                                <div class="info-box success">
+                                    <h4>AI phân tích thành công!</h4>
+                                    <p>AI đã phân tích dữ liệu và đưa ra nhận định chi tiết bên dưới.</p>
+                                </div>
+                            <?php endif; ?>
+                        <?php endif; ?>
                     </div>
                 <?php endif; ?>
-            <?php endif; ?>
-        </div>
-    <?php endif; ?>
-</div>
+            </div>
 
-<style>
-@keyframes loading {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(400%); }
+            <style>
+            /* Layout */
+            body.predict-page {
+                background: linear-gradient(180deg, #f4f7fb 0%, #eef3f8 100%);
+                font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+                color: #213547;
+            }
+
+            .predict-container {
+                max-width: 1060px;
+                margin: 36px auto;
+                background: #fff;
+                border-radius: 14px;
+                padding: 28px 34px;
+                box-shadow: 0 8px 30px rgba(17, 24, 39, 0.06);
+            }
+
+            .predict-header h1 {
+                margin: 0 0 6px 0;
+                font-size: 1.6rem;
+                color: #ffffff; /* Title color set to white */
+            }
+            .predict-header p { color: #ffffff; margin: 0 0 18px 0; }
+
+            /* Form */
+            .predict-form { display: grid; gap: 18px; }
+            .form-section { background: #fbfdff; border: 1px solid #eef4fb; padding: 16px; border-radius: 10px; }
+            .form-row { display: flex; gap: 18px; flex-wrap: wrap; }
+            .form-group { flex: 1 1 220px; min-width: 180px; }
+            .form-group label { display:block; margin-bottom:8px; font-weight:600; color:#17324f; }
+            .form-group select, .form-group input[type=number] {
+                width:100%; padding:10px 12px; border:1px solid #d5e3ef; border-radius:8px; background:#fff;
+            }
+
+            .btn-predict {
+                display:inline-block; padding:12px 20px; background:#4068f6; color:#fff; border:none; border-radius:10px; font-weight:700; cursor:pointer;
+                box-shadow: 0 6px 18px rgba(64,104,246,0.18);
+            }
+            .btn-predict:hover { transform: translateY(-2px); }
+
+            /* Result cards */
+            .result-container { margin-top: 18px; }
+            .result-details { display:flex; gap:18px; flex-wrap:wrap; margin-top:12px; }
+            .detail-card { flex:1 1 200px; background: linear-gradient(180deg,#ffffff,#fbfcff); border-radius:10px; padding:16px; border:1px solid #eef6ff; }
+            .detail-card h4 { margin:0 0 8px 0; color:#2b4b7a; }
+            .detail-card p { margin:0; font-size:1.2rem; font-weight:700; }
+
+            /* History table */
+            .history-table { width:100%; border-collapse:collapse; margin-top:12px; }
+            .history-table thead th { text-align:left; padding:14px; background:linear-gradient(90deg,#0e789f,#0b6a93); color:#fff; border-radius:8px; }
+            .history-table tbody td { padding:12px; border-bottom:1px solid #f2f7fb; }
+            .result-difference-positive { color:#17a673; font-weight:600; }
+            .result-difference-negative { color:#e04b5a; font-weight:600; }
+
+            /* Info boxes */
+            .info-box { padding:14px 18px; border-radius:10px; margin:14px 0; border-left:5px solid #2196F3; background: #f1f8ff; }
+            .info-box.success { border-left-color:#28a745; background:#eefaf1; }
+            .info-box.error { border-left-color:#ffc107; background:#fff7e6; }
+            .info-box.warning { border-left-color:#ff8a65; background:#fff6f4; }
+            .info-box h4 { margin:0 0 6px 0; font-size:1.05rem; }
+            .info-box p { margin:0; color:#3b556b; }
+            .info-box .small { font-size:0.9rem; color:#6b7680; }
+
+            /* AI cards */
+            .ai-analysis-section { margin-top:18px; }
+            .ai-analysis-section h3 { text-align:center; color:#6b4bd6; margin-bottom:14px; }
+            .ai-card { background:#fff; border-radius:12px; padding:18px; box-shadow:0 6px 20px rgba(12,34,63,0.06); border:1px solid #eef3ff; margin-bottom:12px; }
+            .trend-card { border-left:6px solid #5b7dff; }
+            .recommendations-card { border-left:6px solid #2ec27e; }
+            .conclusion-card { border-left:6px solid #9b6bff; }
+            .recommendations-card ul { list-style:none; padding:0; margin:0; }
+            .recommendations-card li { padding:10px 0; border-bottom:1px dashed #eef8f3; }
+
+            /* Responsive */
+            @media (max-width:900px) {
+                .predict-container { padding:18px; margin:18px; }
+                .form-row { flex-direction:column; }
+                .result-details { flex-direction:column; }
+            }
+
+            </style>
+
+            <script>
+// Compute application root for API calls
+function getAppRoot() {
+    // If server provided BASE_PATH (via header), use it when it looks like a root path (/.../)
+    if (typeof window !== 'undefined' && window.BASE_PATH && window.BASE_PATH.charAt(0) === '/') {
+        return window.BASE_PATH;
+    }
+    // Otherwise, try to derive base_path from stylesheet URL (reliable: assets/css/style.css)
+    try {
+        var link = document.querySelector('link[href*="/assets/"]');
+        if (link && link.href) {
+            var href = link.getAttribute('href');
+            // href may be absolute or relative; if absolute, parse origin
+            var url = href;
+            // Ensure we handle case where href is absolute (http(s)://...)
+            var pathOnly = href;
+            try {
+                var u = new URL(href, window.location.origin);
+                pathOnly = u.pathname;
+            } catch(e) { /* ignore */ }
+            var idx = pathOnly.indexOf('/assets/');
+            if (idx !== -1) {
+                var candidate = pathOnly.substring(0, idx+1);
+                return candidate;
+            }
+        }
+    } catch (e) {
+        // ignore
+    }
+    // Last resort: use root '/'
+    return '/';
 }
 
-/* AI Analysis Cards Styling */
-.ai-analysis-section {
-    margin-top: 30px;
-}
-
-.ai-analysis-section > h3 {
-    color: #5856d6;
-    font-size: 1.5rem;
-    margin-bottom: 20px;
-    padding-bottom: 10px;
-    border-bottom: 3px solid #5856d6;
-}
-
-.ai-card {
-    background: white;
-    border-radius: 12px;
-    padding: 20px;
-    margin-bottom: 20px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.ai-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-}
-
-.ai-card h4 {
-    margin: 0 0 15px 0;
-    font-size: 1.2rem;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.ai-card p, .ai-card ul {
-    margin: 0;
-    line-height: 1.8;
-    color: #333;
-    white-space: pre-wrap; /* Giữ nguyên xuống dòng và spaces */
-    word-wrap: break-word; /* Tự động xuống dòng khi text quá dài */
-    overflow-wrap: break-word; /* Đảm bảo text không tràn ra ngoài */
-}
-
-.ai-card p {
-    text-align: justify; /* Căn đều 2 bên */
-}
-
-/* Trend Card - Blue Theme */
-.trend-card {
-    border-left: 4px solid #5856d6;
-    background: linear-gradient(135deg, #f5f7ff 0%, #ffffff 100%);
-}
-
-.trend-card h4 {
-    color: #5856d6;
-}
-
-/* Recommendations Card - Green Theme */
-.recommendations-card {
-    border-left: 4px solid #34c759;
-    background: linear-gradient(135deg, #f0fff4 0%, #ffffff 100%);
-}
-
-.recommendations-card h4 {
-    color: #34c759;
-}
-
-.recommendations-card ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.recommendations-card li {
-    padding: 10px 0 10px 30px;
-    position: relative;
-    border-bottom: 1px solid #e8f5e9;
-}
-
-.recommendations-card li:last-child {
-    border-bottom: none;
-}
-
-.recommendations-card li:before {
-    content: "✓";
-    position: absolute;
-    left: 0;
-    top: 10px;
-    background: #34c759;
-    color: white;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    font-weight: bold;
-}
-
-/* Conclusion Card - Purple Theme */
-.conclusion-card {
-    border-left: 4px solid #af52de;
-    background: linear-gradient(135deg, #faf5ff 0%, #ffffff 100%);
-}
-
-.conclusion-card h4 {
-    color: #af52de;
-}
-
-.conclusion-card p {
-    font-size: 1.05rem;
-    font-weight: 500;
-}
-</style>
-
-<script>
 // Load majors when university is selected
 function loadMajors(universityId) {
     const majorSelect = document.getElementById('major_id');
@@ -574,7 +562,9 @@ function loadMajors(universityId) {
     majorSelect.innerHTML = '<option value="">Đang tải...</option>';
     examBlockSelect.innerHTML = '<option value="">-- Chọn ngành trước --</option>';
     
-    fetch(`get_majors.php?university_id=${universityId}`)
+    const MAJORS_API_URL = (window.location.origin || (window.location.protocol + '//' + window.location.host)) + getAppRoot() + 'get_majors';
+    console.log('MAJORS_API_URL computed as', MAJORS_API_URL);
+    fetch(`${MAJORS_API_URL}?university_id=${universityId}`)
         .then(response => response.json())
         .then(data => {
             if (data.success && data.majors.length > 0) {
@@ -605,7 +595,9 @@ function loadExamBlocks(majorId) {
     console.log(`Loading exam blocks for major_id: ${majorId}`);
     examBlockSelect.innerHTML = '<option value="">Đang tải khối thi...</option>';
     
-    fetch(`get_exam_blocks.php?major_id=${majorId}`)
+    const EXAM_BLOCKS_API_URL = (window.location.origin || (window.location.protocol + '//' + window.location.host)) + getAppRoot() + 'get_exam_blocks';
+    console.log('EXAM_BLOCKS_API_URL computed as', EXAM_BLOCKS_API_URL);
+    fetch(`${EXAM_BLOCKS_API_URL}?major_id=${majorId}`)
         .then(response => {
             console.log('Response status:', response.status);
             return response.json();
@@ -645,7 +637,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const selectedExamBlock = '<?php echo isset($_POST['exam_block']) ? $_POST['exam_block'] : ''; ?>';
     
     if (selectedUniversityId) {
-        fetch(`get_majors.php?university_id=${selectedUniversityId}`)
+    const MAJORS_API_URL = getAppRoot() + 'get_majors';
+    fetch(`${MAJORS_API_URL}?university_id=${selectedUniversityId}`)
             .then(response => response.json())
             .then(data => {
                 if (data.success && data.majors.length > 0) {
@@ -658,7 +651,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                     // Nếu có major được chọn, load exam blocks
                     if (selectedMajorId) {
-                        fetch(`get_exam_blocks.php?major_id=${selectedMajorId}`)
+                        const EXAM_BLOCKS_API_URL = getAppRoot() + 'get_exam_blocks';
+                        fetch(`${EXAM_BLOCKS_API_URL}?major_id=${selectedMajorId}`)
                             .then(response => response.json())
                             .then(data => {
                                 if (data.success && data.blocks.length > 0) {
@@ -678,7 +672,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Hàm gọi AI (tách riêng để tái sử dụng)
 async function callAIAnalysis() {
-    const aiBtn = document.getElementById('aiAnalysisBtn');
+    const aiBtn = document.getElementById('aiAnalyzeTrigger') || document.getElementById('aiAnalysisBtn');
     if (!aiBtn) return;
     
     // Bắt đầu phân tích
@@ -690,9 +684,9 @@ async function callAIAnalysis() {
     document.getElementById('aiError').style.display = 'none';
     
     // Disable button và hiển thị trạng thái
-    aiBtn.disabled = true;
-    aiBtn.style.opacity = '0.6';
-    aiBtn.innerHTML = '<span>Đang phân tích...</span>';
+    try { aiBtn.disabled = true; } catch (e) {}
+    try { aiBtn.style.opacity = '0.6'; } catch (e) {}
+    try { aiBtn.innerHTML = '<span>Đang phân tích...</span>'; } catch (e) {}
     
     // Scroll to AI section
     setTimeout(() => {
@@ -727,20 +721,64 @@ async function callAIAnalysis() {
     console.log('Provider:', predictionData.provider);
     
     try {
-        // Gọi Python backend API
-        const PYTHON_API_URL = 'http://localhost:5000/analyze';
+    // Gọi PHP API endpoint (thay thế Python backend)
+    // Dùng URL tương đối để đảm bảo hoạt động khi project nằm trong thư mục con (ví dụ /tuyensinh)
+    // Use 'api_analyze' without .php to avoid 301 redirect from .php -> clean URL which can turn POST into GET
+    const PHP_API_URL = getAppRoot() + 'api_analyze';
         
-        const response = await fetch(PYTHON_API_URL, {
+        // Build request options and log them for debugging
+        const requestOptions = {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
+                'Content-Type': 'application/json'
             },
-            body: JSON.stringify(predictionData)
+            body: JSON.stringify(predictionData),
+            cache: 'no-store',
+            // avoid redirect-to-GET problems by explicitly following redirects or fail early
+            redirect: 'follow'
+        };
+        console.log('AI Request URL:', PHP_API_URL);
+        console.log('AI Request Options preview:', {
+            method: requestOptions.method,
+            headers: requestOptions.headers,
+            bodyPreview: requestOptions.body ? requestOptions.body.substring(0, 100) : ''
         });
+
+        // Try fetch first
+        let response = await fetch(PHP_API_URL, requestOptions);
+
+        // If the response is 405 (Method Not Allowed) or a GET was used, try fallback to XHR POST to avoid broken redirects that switch POST to GET
+        if (response.status === 405) {
+            console.warn('Fetch to API returned 405. Attempting XHR POST fallback to avoid redirect-to-GET issues.');
+            response = await (new Promise((resolve, reject) => {
+                try {
+                    const xhr = new XMLHttpRequest();
+                    xhr.open('POST', PHP_API_URL, true);
+                    xhr.setRequestHeader('Content-Type', 'application/json');
+                    xhr.onreadystatechange = function() {
+                        if (xhr.readyState === 4) {
+                            // Construct a Response-like object for downstream logic
+                            resolve(new Response(xhr.responseText, { status: xhr.status, statusText: xhr.statusText }));
+                        }
+                    };
+                    xhr.onerror = function() { reject(new Error('XHR error')); };
+                    xhr.send(requestOptions.body);
+                } catch (e) { reject(e); }
+            }));
+            console.log('XHR POST fallback complete, status:', response.status);
+        }
         
         console.log('HTTP Status:', response.status);
-        
-        const data = await response.json();
+        // Read response as text first to allow debugging invalid JSON from server
+    const rawText = await response.text();
+        console.log('Raw response text (first 500 chars):', rawText.substring(0, 500));
+        let data;
+        try {
+            data = JSON.parse(rawText);
+        } catch (jsonErr) {
+            console.error('Invalid JSON response from server: ', rawText.substring(0, 400));
+            throw new Error('Invalid JSON response from server');
+        }
         console.log('Full Response:', data);
         
         // Kiểm tra lỗi
@@ -820,8 +858,8 @@ async function callAIAnalysis() {
                 document.getElementById('conclusionText').innerHTML = analysis.conclusion.replace(/\n/g, '<br>');
             }
             
-            // Ẩn nút sau khi thành công
-            aiBtn.style.display = 'none';
+            // Ẩn nút sau khi thành công (nếu muốn) hoặc giữ để xem lại
+            //aiBtn.style.display = 'none';
             
         } else {
             throw new Error('Invalid response structure from Python API');
@@ -837,9 +875,9 @@ async function callAIAnalysis() {
         document.getElementById('errorMessage').textContent = error.message || 'Đã xảy ra lỗi khi kết nối với Python backend';
         
         // Enable lại button để retry
-        aiBtn.disabled = false;
-        aiBtn.style.opacity = '1';
-        aiBtn.innerHTML = '<span>Thử lại</span>';
+        try { aiBtn.disabled = false; } catch (e) {}
+        try { aiBtn.style.opacity = '1'; } catch (e) {}
+        try { aiBtn.innerHTML = '<span>Thử lại</span>'; } catch (e) {}
     }
 }
 
@@ -854,9 +892,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Xử lý nút phân tích AI (cho trường hợp retry thủ công)
 document.addEventListener('DOMContentLoaded', function() {
-    const aiBtn = document.getElementById('aiAnalysisBtn');
-    if (aiBtn) {
-        aiBtn.addEventListener('click', callAIAnalysis);
+    const aiTriggerBtn = document.getElementById('aiAnalyzeTrigger');
+    if (aiTriggerBtn) {
+        aiTriggerBtn.addEventListener('click', callAIAnalysis);
     }
 });
 
